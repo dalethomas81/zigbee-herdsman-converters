@@ -3248,6 +3248,64 @@ const devices = [
         },
     },
     {
+        zigbeeModel: ['Switch 4x-LIGHTIFY'],
+        model: 'E21265',
+        vendor: 'OSRAM',
+        description: 'Smart+ switch',
+        supports: 'action',
+        fromZigbee: [
+            fz.osram_lightify_4x_switch_cmdOn,
+            fz.osram_lightify_4x_switch_cmdOff,
+            fz.osram_lightify_4x_switch_cmdMoveWithOnOff,
+            fz.osram_lightify_4x_switch_cmdMove,
+            fz.osram_lightify_4x_switch_cmdStop,
+            fz.osram_lightify_4x_switch_battery,
+        ],
+        toZigbee: [],
+        meta: {configureKey: 1},
+        ota: ota.ledvance,
+        configure: async (device, coordinatorEndpoint) => {
+			const options = {manufacturerCode: 0x110c, disableDefaultResponse: false};
+			const payload = {0x000a: {value: 0x01,type: 0x20},
+							0x000b: {value: 0x00,type: 0x20},
+							0x000c: {value: 0xffff,type: 0x21},
+							0x000d: {value: 0xffff,type: 0x21},
+							0x0019: {value: 0x06,type: 0x20},
+							0x001a: {value: 0x0001,type: 0x21},
+							0x001b: {value: 0x0026,type: 0x21},
+							0x001c: {value: 0x07,type: 0x20},
+							0x001d: {value: 0xffff,type: 0x21},
+							0x001e: {value: 0xffff,type: 0x21},
+							0x002c: {value: 0xffff,type: 0x21},
+							0x002d: {value: 0xffff,type: 0x21},
+							0x002e: {value: 0xffff,type: 0x21},
+							0x002f: {value: 0xffff,type: 0x21}
+							};
+            const endpoint1 = device.getEndpoint(1);
+            const endpoint2 = device.getEndpoint(2);
+            const endpoint3 = device.getEndpoint(3);
+            const endpoint4 = device.getEndpoint(4);
+			// start fast polling
+			await endpoint1.command('genPollCtrl', 'checkinRsp', {startfastpolling: true, fastpolltimeout: 3600},{});
+			// top left button
+            await endpoint1.write('manuSpecificOsramButton', payload, options);
+            await bind(endpoint1, coordinatorEndpoint, ['genOnOff', 'genLevelCtrl', 'genPowerCfg']);
+			// top right button
+            await endpoint2.write('manuSpecificOsramButton', payload, options);
+            await bind(endpoint2, coordinatorEndpoint, ['genOnOff', 'genLevelCtrl']);
+			// bottom left button
+            await endpoint3.write('manuSpecificOsramButton', payload, options);
+            await bind(endpoint3, coordinatorEndpoint, ['genOnOff', 'genLevelCtrl']);
+			// bottom right button
+            await endpoint4.write('manuSpecificOsramButton', payload, options);
+            await bind(endpoint4, coordinatorEndpoint, ['genOnOff', 'genLevelCtrl']);
+			// set up reporting
+            await configureReporting.batteryVoltage(endpoint1);
+			// stop fast polling
+            await endpoint1.command('genPollCtrl', 'fastPollStop', {}, {});
+        },
+    },
+    {
         zigbeeModel: ['Switch 4x EU-LIGHTIFY'],
         model: '4058075816459',
         vendor: 'OSRAM',
