@@ -3229,6 +3229,59 @@ const converters = {
             return {pressure: calibrateAndPrecisionRoundOptions(pressure, options, 'pressure')};
         },
     },
+    osram_lightify_4x_switch_battery: {
+        cluster: 'genPowerCfg',
+        type: ['attributeReport', 'readResponse'],
+        convert: (model, msg, publish, options, meta) => {
+            const payload = {};
+            if (msg.data.hasOwnProperty('batteryVoltage')) {
+                payload['voltage'] = msg.data['batteryVoltage'];
+            }
+
+            if (msg.data.hasOwnProperty('batteryAlarmState')) {
+                payload['battery_low'] = msg.data.batteryAlarmState;
+            }
+
+            if (Object.keys(payload).length !== 0) {
+                return payload;
+            }
+        },
+    },
+    osram_lightify_4x_switch_cmdOn: {
+        cluster: 'genOnOff',
+        type: 'commandOn',
+        convert: (model, msg, publish, options, meta) => {
+            return {endpoint: msg.endpoint.ID, cluster: 'genOnOff', type: 'commandOn'};
+        },
+    },
+    osram_lightify_4x_switch_cmdOff: {
+        cluster: 'genOnOff',
+        type: 'commandOff',
+        convert: (model, msg, publish, options, meta) => {
+            return {endpoint: msg.endpoint.ID, cluster: 'genOnOff', type: 'commandOff'};
+        },
+    },
+    osram_lightify_4x_switch_cmdMove: {
+        cluster: 'genLevelCtrl',
+        type: 'commandMove',
+        convert: (model, msg, publish, options, meta) => {
+            return {endpoint: msg.endpoint.ID, cluster: 'genLevelCtrl', type: 'commandMove', rate: msg.data.rate};
+        },
+    },
+    osram_lightify_4x_switch_cmdStop: {
+        cluster: 'genLevelCtrl',
+        type: 'commandStop',
+        convert: (model, msg, publish, options, meta) => {
+            return {endpoint: msg.endpoint.ID, cluster: 'genLevelCtrl', type: 'commandStop'};
+        },
+    },
+    osram_lightify_4x_switch_cmdMoveWithOnOff: {
+        cluster: 'genLevelCtrl',
+        type: 'commandMoveWithOnOff',
+        convert: (model, msg, publish, options, meta) => {
+            return {endpoint: msg.endpoint.ID, cluster: 'genLevelCtrl', type: 'commandMoveWithOnOff', rate: msg.data.rate};
+        },
+    },
     osram_lightify_switch_cmdOn: {
         cluster: 'genOnOff',
         type: 'commandOn',
